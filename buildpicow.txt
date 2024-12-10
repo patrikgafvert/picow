@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 NAME=arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi
-curl -# -L https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/$NAME.tar.xz | tar --xz -xf -
+[[ ! -d $NAME ]] && curl -# -L https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/$NAME.tar.xz | tar --xz -xf -
 export PATH=$(pwd)/$NAME/bin:$PATH
 # which arm-none-eabi-gcc
 git clone https://github.com/adafruit/circuitpython.git
