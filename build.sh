@@ -23,8 +23,7 @@ cd circuitpython
 pip3 install --upgrade pip
 pip3 install --upgrade -r requirements-dev.txt
 pip3 install --upgrade -r requirements-doc.txt
-#make fetch-all-submodules
-pip3 install huffman
+make fetch-all-submodules
 make -C mpy-cross
 cd ports/raspberrypi
 make fetch-port-submodules
@@ -59,11 +58,16 @@ cat << "EOF" > dhcpserver.c.patch
      dhcp_socket_sendto(&d->udp, netif, &dhcp_msg, opt - (uint8_t *)&dhcp_msg, 0xffffffff, PORT_DHCP_CLIENT);
 EOF
 patch ../../shared/netutils/dhcpserver.c < dhcpserver.c.patch 
+patch circuitpython/shared/netutils/dhcpserver.c < dhcpserver.c.patch
+git commit -m "Changed dhcp options" circuitpython/shared/netutils/dhcpserver.c
 make -j$(nproc) BOARD=raspberry_pi_pico_w TRANSLATION=sv
 
 # cp build-raspberry_pi_pico_w/firmware.uf2 /run/media/patrik/RPI-RP2/
 # cp picow/circuitpython/ports/raspberrypi/build-raspberry_pi_pico_w /run/media/patrik/RPI-RP2/
 deactivate
+pip3 install circup
+circup install asyncio
+circup install adafruit-circuitpython-httpserver
 
 #cd ports/raspberrypi
 #make clean BOARD=raspberry_pi_pico_w TRANSLATION=sv
