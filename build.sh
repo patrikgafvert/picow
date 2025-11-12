@@ -23,6 +23,7 @@ pip3 install --upgrade -r requirements-dev.txt
 pip3 install --upgrade -r requirements-doc.txt
 # git checkout origin
 make fetch-all-submodules
+pre-commit install
 make -C mpy-cross
 cd ports/raspberrypi
 make fetch-port-submodules
