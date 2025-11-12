@@ -15,15 +15,15 @@ NAME=${NAME}-${VER}-${ARCH}
 export PATH=$(pwd)/$NAME/bin:$PATH
 # which arm-none-eabi-gcc
 git clone https://github.com/adafruit/circuitpython.git
-cd circuitpython
 python3 -m venv .
 . ./bin/activate
+cd circuitpython
+./tools/git-checkout-latest-tag.sh
 pip3 install --upgrade pip
 pip3 install --upgrade -r requirements-dev.txt
 pip3 install --upgrade -r requirements-doc.txt
-git checkout main
-make fetch-all-submodules
-pre-commit install
+#make fetch-all-submodules
+pip3 install huffman
 make -C mpy-cross
 cd ports/raspberrypi
 make fetch-port-submodules
