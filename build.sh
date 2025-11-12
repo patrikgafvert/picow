@@ -12,8 +12,9 @@ FILE=${NAME}-${VER}-${ARCH}.${EXT}
 URL=https://developer.arm.com/-/media/Files/downloads/gnu/${VER}/binrel/${FILE}
 NAME=${NAME}-${VER}-${ARCH}
 [[ ! -d $NAME ]] && curl -# -L ${URL} | tar --xz -xf -
-export PATH=$(pwd)/$NAME/bin:$PATH
-# which arm-none-eabi-gcc
+
+export PATH=/home/patrik/Projekt/picow/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin:$PATH
+which arm-none-eabi-gcc
 git clone https://github.com/adafruit/circuitpython.git
 python3 -m venv .
 . ./bin/activate
