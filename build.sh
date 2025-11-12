@@ -1,7 +1,15 @@
 #!/bin/bash
 # https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-NAME=arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi
-[[ ! -d $NAME ]] && curl -# -L https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/$NAME.tar.xz | tar --xz -xf -
+# https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+
+NAME=arm-gnu-toolchain
+VER=14.3.rel1
+ARCH=x86_64-arm-none-eabi
+EXT=tar.xz
+FILE=${NAME}-${VER}-${ARCH}.${EXT}
+URL=https://developer.arm.com/-/media/Files/downloads/gnu/${VER}/binrel/${FILE}
+NAME=${NAME}-${VER}-${ARCH}
+[[ ! -d $NAME ]] && curl -# -L ${URL} | tar --xz -xf -
 export PATH=$(pwd)/$NAME/bin:$PATH
 # which arm-none-eabi-gcc
 git clone https://github.com/adafruit/circuitpython.git
