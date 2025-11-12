@@ -1,6 +1,7 @@
 #!/bin/bash
 # https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 # https://developer.arm.com/-/media/Files/downloads/gnu/14.3.rel1/binrel/
+# https://github.com/dbisu/pico-ducky.git
 
 NAME=arm-gnu-toolchain
 VER=14.3.rel1
