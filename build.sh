@@ -21,7 +21,7 @@ python3 -m venv .
 pip3 install --upgrade pip
 pip3 install --upgrade -r requirements-dev.txt
 pip3 install --upgrade -r requirements-doc.txt
-# git checkout origin
+git checkout main
 make fetch-all-submodules
 pre-commit install
 make -C mpy-cross
