@@ -18,6 +18,7 @@ git clone https://github.com/adafruit/circuitpython.git
 cd circuitpython
 python3 -m venv .
 . ./bin/activate
+pip3 install --upgrade pip
 pip3 install --upgrade -r requirements-dev.txt
 pip3 install --upgrade -r requirements-doc.txt
 # git checkout origin
