@@ -10,7 +10,7 @@ HOST=portal.${DOMAIN}
 IP=192.168.1.4
 PORTALURL=https://${HOST}/
 
-define dhcpserver_file
+define patch_dhcpserver_file
 @@ -57,6 +57,7 @@
  #define DHCP_OPT_DNS                (6)
  #define DHCP_OPT_HOST_NAME          (12)
@@ -68,5 +68,5 @@ distclean:
 	rm -rf $(TOOLCHAINDIRNAME) circuitpython pico-ducky cert.pem key.pem flash_nuke.uf2
 
 patch:
-	patch circuitpython/shared/netutils/dhcpserver.c <<< $$dhcpserver_file
+	patch circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
 
