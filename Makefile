@@ -67,8 +67,6 @@ makecert:
 distclean:
 	rm -rf $(TOOLCHAINDIRNAME) circuitpython pico-ducky cert.pem key.pem flash_nuke.uf2
 
-echo:
-	printf "%s\n" "$$dhcpserver_file"
-
 patch:
 	patch circuitpython/shared/netutils/dhcpserver.c <<< $$dhcpserver_file
+
