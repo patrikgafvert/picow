@@ -5,10 +5,11 @@ TOOLCHAINEXT=tar.xz
 TOOLCHAINFILE=$(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH).$(TOOLCHAINEXT)
 TOOLCHAINURL=https://developer.arm.com/-/media/Files/downloads/gnu/$(TOOLCHAINVER)/binrel/$(TOOLCHAINFILE)
 TOOLCHAINDIRNAME=$(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH)
+HOST=portal
 DOMAIN=local
-HOST=portal.${DOMAIN}
+FQDN=${HOST}.${DOMAIN}
 IP=192.168.1.4
-PORTALURL=https://${HOST}/
+PORTALURL=https://${FQDN}/
 
 define patch_dhcpserver_file
 @@ -57,6 +57,7 @@
@@ -62,7 +63,7 @@ flash_nuke.uf2:
 	curl -LO https://datasheets.raspberrypi.com/soft/flash_nuke.uf2
 
 makecert:
-	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(HOST)" -addext "subjectAltName=DNS:$(HOST)"
+	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
 
 distclean:
 	rm -rf $(TOOLCHAINDIRNAME) circuitpython pico-ducky cert.pem key.pem flash_nuke.uf2
