@@ -50,7 +50,7 @@ export
 
 all: download makecert
 
-download: $(TOOLCHAINDIRNAME) circuitpython pico-ducky flash_nuke.uf2
+download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
 
 
 $(TOOLCHAINDIRNAME):
@@ -58,6 +58,9 @@ $(TOOLCHAINDIRNAME):
 
 circuitpython:
 	git clone https://github.com/adafruit/circuitpython
+
+circuitpythonkeybl:
+	git clone https://github.com/Neradoc/Circuitpython_Keyboard_Layouts
 
 pico-ducky:
 	git clone https://github.com/dbisu/pico-ducky
