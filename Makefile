@@ -10,7 +10,7 @@ DOMAIN=local
 FQDN=${HOST}.${DOMAIN}
 IP=192.168.1.4
 PORTALURL=https://${FQDN}/
-RUNPYENV = . bin/activate ; 
+RUNPYENV = source ./bin/activate 
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
@@ -82,16 +82,16 @@ gitgetlatest:
 	cd circuitpython && ./tools/git-checkout-latest-tag.sh
 
 upgradepip:
-	${RUNPYENV} cd circuitpython && pip3 install --upgrade pip
+	${RUNPYENV} && cd circuitpython && pip3 install --upgrade pip
 
 installreq:
-	${RUNPYENV} cd circuitpython && pip3 install --upgrade -r requirements-dev.txt
+	${RUNPYENV} && cd circuitpython && pip3 install --upgrade -r requirements-dev.txt
 	
 installdoc:
-	${RUNPYENV} cd circuitpython && pip3 install --upgrade -r requirements-doc.txt
+	${RUNPYENV} && cd circuitpython && pip3 install --upgrade -r requirements-doc.txt
 
 installcircup:
-	${RUNPYENV} cd circuitpython && pip3 install circup
+	${RUNPYENV} && cd circuitpython && pip3 install circup
 
 fetchsubmod:
 	${EXPORT} && cd circuitpython && make fetch-all-submodules
@@ -103,7 +103,7 @@ fetchportsubmod:
 	${EXPORT} && cd circuitpython/ports/raspberrypi && make fetch-port-submodules
 	
 compile:
-	${RUNPYENV} ${EXPORT} && cd circuitpython/ports/raspberrypi && make -j$(nproc) BOARD=raspberry_pi_pico_w TRANSLATION=sv
+	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && make -j$$(nproc) BOARD=raspberry_pi_pico_w TRANSLATION=sv
 
 resetflash:
 	cp flash_nuke.uf2 ${MOUNTPRPI} 
@@ -112,4 +112,4 @@ copyfirmware:
 	cp circuitpython/ports/raspberrypi/build-raspberry_pi_pico_w/firmware.uf2 ${MOUNTPRPI}
 
 installpythondep:
-	${RUNPYENV} circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi adafruit_hid.keyboard_layout_se
+	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi adafruit_hid.keyboard_layout_se
