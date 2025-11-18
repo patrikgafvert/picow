@@ -97,7 +97,7 @@ fetchsubmod:
 	${EXPORT} && cd circuitpython && make fetch-all-submodules
 
 mpycross:
-	${EXPORT} && cd circuitpython && make -C mpy-cross
+	cd circuitpython && make -j$$(nproc) -C mpy-cross
 
 fetchportsubmod:
 	${EXPORT} && cd circuitpython/ports/raspberrypi && make fetch-port-submodules
