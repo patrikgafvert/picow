@@ -112,4 +112,4 @@ copyfirmware:
 	cp circuitpython/ports/raspberrypi/build-raspberry_pi_pico_w/firmware.uf2 ${MOUNTPRPI}
 
 installpythondep:
-	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi adafruit_hid.keyboard_layout_se
+	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
