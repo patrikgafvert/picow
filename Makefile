@@ -46,7 +46,26 @@ define patch_dhcpserver_file
      dhcp_socket_sendto(&d->udp, netif, &dhcp_msg, opt - (uint8_t *)&dhcp_msg, 0xffffffff, PORT_DHCP_CLIENT);
 endef
 
+
+define no_dirty_patch
+@@ -14,7 +14,6 @@ def get_version_info_from_git(repo_path, extra_args=[]):
+                 [
+                     "git",
+                     "describe",
+-                    "--dirty",
+                     "--tags",
+                     "--always",
+                     "--first-parent",
+endef
+
+
 export
+
+.PHONY: list all download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy
+
+list:
+	@grep -E '^[a-zA-Z0-9_-]+:.*$$' Makefile | cut -d':' -f1
+
 
 all: download makecert
 
@@ -116,3 +135,14 @@ copyfirmware:
 
 installpythondep:
 	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
+
+makecircuitpyhtonkeybl:
+	${RUNPYENV} && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
+	${RUNPYENV} && PYTHONPATH="Circuitpython_Keyboard_Layouts" python3 -m generator -k "https://kbdlayout.info/kbdsw" -l "sw" --output-layout ./keyboard_layout_win_sw.py --output-keycode ./keycode_win_sw.py
+
+makekeympy:
+	circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
+	circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
+
+patch_no_dirty:
+	patch circuitpython/py/version.py <<< $$no_dirty_patch
