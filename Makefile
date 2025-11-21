@@ -1,19 +1,28 @@
-TOOLCHAINNAME=arm-gnu-toolchain
-TOOLCHAINVER=14.3.rel1
-TOOLCHAINARCH=x86_64-arm-none-eabi
-TOOLCHAINEXT=tar.xz
-TOOLCHAINFILE=$(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH).$(TOOLCHAINEXT)
-TOOLCHAINURL=https://developer.arm.com/-/media/Files/downloads/gnu/$(TOOLCHAINVER)/binrel/$(TOOLCHAINFILE)
-TOOLCHAINDIRNAME=$(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH)
-HOST=portal
-DOMAIN=local
-FQDN=${HOST}.${DOMAIN}
-IP=192.168.1.4
-PORTALURL=https://${FQDN}/
-RUNPYENV = source ./bin/activate 
-EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
-MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
-MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
+define BOARDCODE
+while true; do \
+    i=1; \
+    declare -A boards; \
+    for b in $$(basename -a $$(ls -1d circuitpython/ports/raspberrypi/boards/raspberry_pi* 2>/dev/null | sort -t_ -k1,3 -k4)); do \
+        boards[$$i]=$$b; \
+        i=$$((i+1)); \
+    done; \
+    if [ $$i -eq 1 ]; then \
+        echo "Ingen board hittad i boards/!" >&2; exit 1; \
+    fi; \
+    echo "Välj board:" >&2; \
+    for n in $$(printf "%s\n" "$${!boards[@]}" | sort -n); do \
+        echo "$$n) $${boards[$$n]}" >&2; \
+    done; \
+    echo -n "Ange nummer [1-$$((i-1))]: " >&2; \
+    read val; \
+    if [[ -n $${boards[$$val]} ]]; then \
+        echo -n $${boards[$$val]}; \
+        break; \
+    else \
+        echo "Ogiltigt val! Försök igen." >&2; \
+    fi; \
+done
+endef
 
 define patch_dhcpserver_file
 @@ -57,6 +57,7 @@
@@ -46,7 +55,6 @@ define patch_dhcpserver_file
      dhcp_socket_sendto(&d->udp, netif, &dhcp_msg, opt - (uint8_t *)&dhcp_msg, 0xffffffff, PORT_DHCP_CLIENT);
 endef
 
-
 define no_dirty_patch
 @@ -14,7 +14,6 @@ def get_version_info_from_git(repo_path, extra_args=[]):
                  [
@@ -58,19 +66,34 @@ define no_dirty_patch
                      "--first-parent",
 endef
 
+TOOLCHAINNAME = arm-gnu-toolchain
+TOOLCHAINVER = 14.3.rel1
+TOOLCHAINARCH = x86_64-arm-none-eabi
+TOOLCHAINEXT = tar.xz
+TOOLCHAINFILE = $(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH).$(TOOLCHAINEXT)
+TOOLCHAINURL = https://developer.arm.com/-/media/Files/downloads/gnu/$(TOOLCHAINVER)/binrel/$(TOOLCHAINFILE)
+TOOLCHAINDIRNAME = $(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH)
+HOST = portal
+DOMAIN = local
+FQDN = ${HOST}.${DOMAIN}
+IP = 192.168.1.4
+PORTALURL = https://${FQDN}/
+RUNPYENV = source ./bin/activate 
+EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
+MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
+MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
+#BOARD := $(shell ${BOARDCODE})
 
 export
 
 .PHONY: list all download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy
 
+all: download makecert
+
 list:
 	@grep -E '^[a-zA-Z0-9_-]+:.*$$' Makefile | cut -d':' -f1
 
-
-all: download makecert
-
 download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
-
 
 $(TOOLCHAINDIRNAME):
 	curl -# -L $(TOOLCHAINURL) | tar --xz -xf -
@@ -125,13 +148,13 @@ fetchportsubmod:
 	${EXPORT} && cd circuitpython/ports/raspberrypi && make fetch-port-submodules
 	
 compile:
-	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && make -j$$(nproc) BOARD=raspberry_pi_pico_w TRANSLATION=sv
+	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && make -j$$(nproc) BOARD=${BOARD} TRANSLATION=sv
 
 resetflash:
 	cp flash_nuke.uf2 ${MOUNTPRPI} 
 
 copyfirmware:
-	cp circuitpython/ports/raspberrypi/build-raspberry_pi_pico_w/firmware.uf2 ${MOUNTPRPI}
+	cp circuitpython/ports/raspberrypi/build-${BOARD}/firmware.uf2 ${MOUNTPRPI}
 
 installpythondep:
 	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
