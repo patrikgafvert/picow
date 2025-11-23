@@ -82,7 +82,7 @@ RUNPYENV = source ./bin/activate
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
-#BOARD := $(shell ${BOARDCODE})
+BOARD := $(shell ${BOARDCODE})
 
 export
 
@@ -139,16 +139,16 @@ installcircup:
 	${RUNPYENV} && cd circuitpython && pip3 install circup
 
 fetchsubmod:
-	${EXPORT} && cd circuitpython && make fetch-all-submodules
+	${EXPORT} && cd circuitpython && $(MAKE) fetch-all-submodules
 
 mpycross:
-	cd circuitpython && make -j$$(nproc) -C mpy-cross
+	cd circuitpython && $(MAKE) -j$$(nproc) -C mpy-cross
 
 fetchportsubmod:
-	${EXPORT} && cd circuitpython/ports/raspberrypi && make fetch-port-submodules
+	${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) fetch-port-submodules
 	
 compile:
-	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && make -j$$(nproc) BOARD=${BOARD} TRANSLATION=sv
+	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) -j$$(nproc) BOARD=${BOARD} TRANSLATION=sv
 
 resetflash:
 	cp flash_nuke.uf2 ${MOUNTPRPI} 
