@@ -67,7 +67,7 @@ define no_dirty_patch
 endef
 
 TOOLCHAINNAME = arm-gnu-toolchain
-TOOLCHAINVER = 14.3.rel1
+TOOLCHAINVER := $(shell curl -s "https://developer.arm.com/downloads/-/$(TOOLCHAINNAME)-downloads" | awk 'BEGIN{RS="</title>"}/<title>/{gsub(/.*<title>/,""); if(NR==2) print $$4}' | tr '[:upper:]' '[:lower:]')
 TOOLCHAINARCH = x86_64-arm-none-eabi
 TOOLCHAINEXT = tar.xz
 TOOLCHAINFILE = $(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH).$(TOOLCHAINEXT)
@@ -82,11 +82,11 @@ RUNPYENV = source ./bin/activate
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
-BOARD := $(shell ${BOARDCODE})
+#BOARD := $(shell ${BOARDCODE})
 
 export
 
-.PHONY: list all download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy
+.PHONY: list all download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy $(TOOLCHAINDIRNAME)
 
 all: download makecert
 
@@ -96,7 +96,7 @@ list:
 download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
 
 $(TOOLCHAINDIRNAME):
-	curl -# -L $(TOOLCHAINURL) | tar --xz -xf -
+	curl -L -# $(TOOLCHAINURL) | tar --xz -xf -
 
 circuitpython:
 	git clone https://github.com/adafruit/circuitpython
