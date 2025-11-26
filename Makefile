@@ -1,29 +1,3 @@
-define BOARDCODE
-while true; do \
-    i=1; \
-    declare -A boards; \
-    for b in $$(basename -a $$(ls -1d circuitpython/ports/raspberrypi/boards/raspberry_pi* 2>/dev/null | sort -t_ -k1,3 -k4)); do \
-        boards[$$i]=$$b; \
-        i=$$((i+1)); \
-    done; \
-    if [ $$i -eq 1 ]; then \
-        echo "Ingen board hittad i boards/!" >&2; exit 1; \
-    fi; \
-    echo "Välj board:" >&2; \
-    for n in $$(printf "%s\n" "$${!boards[@]}" | sort -n); do \
-        echo "$$n) $${boards[$$n]}" >&2; \
-    done; \
-    echo -n "Ange nummer [1-$$((i-1))]: " >&2; \
-    read val; \
-    if [[ -n $${boards[$$val]} ]]; then \
-        echo -n $${boards[$$val]}; \
-        break; \
-    else \
-        echo "Ogiltigt val! Försök igen." >&2; \
-    fi; \
-done
-endef
-
 define patch_dhcpserver_file
 @@ -57,6 +57,7 @@
  #define DHCP_OPT_DNS                (6)
@@ -66,6 +40,11 @@ define no_dirty_patch
                      "--first-parent",
 endef
 
+
+.SILENT:
+SHELL:=$(shell which bash)
+ROOT_DIR=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+MAKEOPT=-j$(shell nproc)
 TOOLCHAINNAME = arm-gnu-toolchain
 TOOLCHAINVER := $(shell curl -s "https://developer.arm.com/downloads/-/$(TOOLCHAINNAME)-downloads" | awk 'BEGIN{RS="</title>"}/<title>/{gsub(/.*<title>/,""); if(NR==2) print $$4}' | tr '[:upper:]' '[:lower:]')
 TOOLCHAINARCH = x86_64-arm-none-eabi
@@ -82,18 +61,42 @@ RUNPYENV = source ./bin/activate
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
-#BOARD := $(shell ${BOARDCODE})
 
 export
 
-.PHONY: list all download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy $(TOOLCHAINDIRNAME)
+.PHONY: list all chooseboard download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy $(TOOLCHAINDIRNAME)
 
 all: download makecert
 
 list:
-	@grep -E '^[a-zA-Z0-9_-]+:.*$$' Makefile | cut -d':' -f1
+	grep -E '^[a-zA-Z0-9_-]+:.*$$' Makefile | cut -d':' -f1
 
 download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
+
+chooseboard:
+	while true; do \
+	    i=1; \
+	    declare -A boards; \
+	    for b in $$(basename -a $$(ls -1d circuitpython/ports/raspberrypi/boards/raspberry_pi* 2>/dev/null | sort -t_ -k1,3 -k4)); do \
+	        boards[$$i]=$$b; \
+	        i=$$((i+1)); \
+	    done; \
+	    if [ $$i -eq 1 ]; then \
+	        echo "Ingen board hittad i boards/!" >&2; exit 1; \
+	    fi; \
+	    echo "Välj board:" >&2; \
+	    for n in $$(printf "%s\n" "$${!boards[@]}" | sort -n); do \
+	        echo "$$n) $${boards[$$n]}" >&2; \
+	    done; \
+	    echo -n "Ange nummer [1-$$((i-1))]: " >&2; \
+	    read val; \
+	    if [[ -n $${boards[$$val]} ]]; then \
+	        echo -n $${boards[$$val]} > BOARD; \
+	        break; \
+	    else \
+	        echo "Ogiltigt val! Försök igen." >&2; \
+	    fi; \
+	done
 
 $(TOOLCHAINDIRNAME):
 	curl -L -# $(TOOLCHAINURL) | tar --xz -xf -
@@ -107,7 +110,6 @@ circuitpythonkeybl:
 pico-ducky:
 	git clone https://github.com/dbisu/pico-ducky
 
-
 flash_nuke.uf2:
 	curl -LO https://datasheets.raspberrypi.com/soft/flash_nuke.uf2
 
@@ -115,7 +117,7 @@ makecert:
 	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
 
 distclean:
-	rm -rf $(TOOLCHAINDIRNAME) circuitpython pico-ducky cert.pem key.pem flash_nuke.uf2
+	rm -rf ${ROOT_DIR}$(TOOLCHAINDIRNAME) ${ROOT_DIR}circuitpython ${ROOT_DIR}pico-ducky ${ROOT_DIR}cert.pem key.pem ${ROOT_DIR}flash_nuke.uf2 ${ROOT_DIR}BOARD ${ROOT_DIR}Circuitpython_Keyboard_Layouts
 
 patch:
 	patch circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
@@ -139,16 +141,16 @@ installcircup:
 	${RUNPYENV} && cd circuitpython && pip3 install circup
 
 fetchsubmod:
-	${EXPORT} && cd circuitpython && $(MAKE) fetch-all-submodules
+	${EXPORT} && cd circuitpython && $(MAKE) ${MAKEOPT} fetch-all-submodules
 
 mpycross:
-	cd circuitpython && $(MAKE) -j$$(nproc) -C mpy-cross
+	cd circuitpython && $(MAKE) ${MAKEOPT} -C mpy-cross
 
 fetchportsubmod:
-	${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) fetch-port-submodules
+	${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) ${MAKEOPT} fetch-port-submodules
 	
 compile:
-	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) -j$$(nproc) BOARD=${BOARD} TRANSLATION=sv
+	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) ${MAKEOPT} BOARD=$$(cat ${ROOT_DIR}BOARD) TRANSLATION=sv
 
 resetflash:
 	cp flash_nuke.uf2 ${MOUNTPRPI} 
