@@ -42,9 +42,9 @@ endef
 
 
 .SILENT:
-SHELL:=$(shell which bash)
-ROOT_DIR=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-MAKEOPT=-j$(shell nproc)
+SHELL := $(shell which bash)
+ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+MAKEOPT = -j$(shell nproc)
 TOOLCHAINNAME = arm-gnu-toolchain
 TOOLCHAINVER := $(shell curl -s "https://developer.arm.com/downloads/-/$(TOOLCHAINNAME)-downloads" | awk 'BEGIN{RS="</title>"}/<title>/{gsub(/.*<title>/,""); if(NR==2) print $$4}' | tr '[:upper:]' '[:lower:]')
 TOOLCHAINARCH = x86_64-arm-none-eabi
@@ -120,7 +120,7 @@ distclean:
 	rm -rf ${ROOT_DIR}$(TOOLCHAINDIRNAME) ${ROOT_DIR}circuitpython ${ROOT_DIR}pico-ducky ${ROOT_DIR}cert.pem key.pem ${ROOT_DIR}flash_nuke.uf2 ${ROOT_DIR}BOARD ${ROOT_DIR}Circuitpython_Keyboard_Layouts
 
 patch:
-	patch circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
+	patch ${ROOT_DIR}circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
 
 pythonvenv:
 	python3 -m venv .
@@ -153,21 +153,21 @@ compile:
 	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) ${MAKEOPT} BOARD=$$(cat ${ROOT_DIR}BOARD) TRANSLATION=sv
 
 resetflash:
-	cp flash_nuke.uf2 ${MOUNTPRPI} 
+	cp ${ROOT_DIR}flash_nuke.uf2 ${MOUNTPRPI} 
 
 copyfirmware:
-	cp circuitpython/ports/raspberrypi/build-${BOARD}/firmware.uf2 ${MOUNTPRPI}
+	cp ${ROOT_DIR}circuitpython/ports/raspberrypi/build-${BOARD}/firmware.uf2 ${MOUNTPRPI}
 
 installpythondep:
 	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
 
 makecircuitpyhtonkeybl:
 	${RUNPYENV} && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
-	${RUNPYENV} && PYTHONPATH="Circuitpython_Keyboard_Layouts" python3 -m generator -k "https://kbdlayout.info/kbdsw" -l "sw" --output-layout ./keyboard_layout_win_sw.py --output-keycode ./keycode_win_sw.py
+	${RUNPYENV} && PYTHONPATH="Circuitpython_Keyboard_Layouts" python3 -m generator -k "https://kbdlayout.info/kbdsw" -l "sw" --output-layout ${ROOT_DIR}keyboard_layout_win_sw.py --output-keycode ${ROOT_DIR}keycode_win_sw.py
 
 makekeympy:
-	circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
-	circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
+	${ROOT_DIR}circuitpython/mpy-cross/build/mpy-cross ${ROOT_DIR}keyboard_layout_win_sw.py
+	${ROOT_DIR}circuitpython/mpy-cross/build/mpy-cross ${ROOT_DIR}keycode_win_sw.py
 
 patch_no_dirty:
-	patch circuitpython/py/version.py <<< $$no_dirty_patch
+	patch ${ROOT_DIR}circuitpython/py/version.py <<< $$no_dirty_patch
