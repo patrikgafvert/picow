@@ -57,7 +57,7 @@ DOMAIN = local
 FQDN = ${HOST}.${DOMAIN}
 IP = 192.168.1.4
 PORTALURL = https://${FQDN}/
-RUNPYENV = source ./bin/activate 
+RUNPYENV = source ${ROOT_DIR}venv/bin/activate 
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
@@ -117,13 +117,13 @@ makecert:
 	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
 
 distclean:
-	rm -rf ${ROOT_DIR}$(TOOLCHAINDIRNAME) ${ROOT_DIR}circuitpython ${ROOT_DIR}pico-ducky ${ROOT_DIR}cert.pem ${ROOT_DIR}key.pem ${ROOT_DIR}flash_nuke.uf2 ${ROOT_DIR}BOARD ${ROOT_DIR}Circuitpython_Keyboard_Layouts
+	rm -rf ${ROOT_DIR}$(TOOLCHAINDIRNAME) ${ROOT_DIR}circuitpython ${ROOT_DIR}pico-ducky ${ROOT_DIR}cert.pem ${ROOT_DIR}key.pem ${ROOT_DIR}flash_nuke.uf2 ${ROOT_DIR}BOARD ${ROOT_DIR}Circuitpython_Keyboard_Layouts ${ROOT_DIR}keyboard_layout_win_sw.py  ${ROOT_DIR}keycode_win_sw.py ${ROOT_DIR}keyboard_layout_win_sw.mpy ${ROOT_DIR}keycode_win_sw.mpy ${ROOT_DIR}venv
 
 patch:
 	patch ${ROOT_DIR}circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
 
 pythonvenv:
-	python3 -m venv .
+	python3 -m venv venv
 
 gitgetlatest:
 	cd circuitpython && ./tools/git-checkout-latest-tag.sh
