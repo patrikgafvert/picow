@@ -20,8 +20,8 @@ define patch_dhcpserver_file
      opt_write_n(&opt, DHCP_OPT_ROUTER, 4, &ip_2_ip4(&d->ip)->addr); // aka gateway; can have multiple addresses
      opt_write_u32(&opt, DHCP_OPT_DNS, DEFAULT_DNS); // can have multiple addresses
      opt_write_u32(&opt, DHCP_OPT_IP_LEASE_TIME, DEFAULT_LEASE_TIME_S);
-+    opt_write_n(&opt, DHCP_OPT_CAPTIVE_PORTAL,  $(shell echo -n $${#PORTALURL}), "${PORTALURL}");
-+    opt_write_n(&opt, DHCP_OPT_CAPTIVE_PORTAL1, $(shell echo -n $${#PORTALURL}), "${PORTALURL}");
++    opt_write_n(&opt, DHCP_OPT_CAPTIVE_PORTAL,  $(shell echo -n $${#PORTALURL}), "$(PORTALURL)");
++    opt_write_n(&opt, DHCP_OPT_CAPTIVE_PORTAL1, $(shell echo -n $${#PORTALURL}), "$(PORTALURL)");
 +    opt_write_n(&opt, DHCP_OPT_DOMAIN_NAME, 5, "local");
 +    opt_write_n(&opt, DHCP_OPT_HOST_NAME,   6, "client");
      *opt++ = DHCP_OPT_END;
@@ -54,11 +54,15 @@ TOOLCHAINURL = https://developer.arm.com/-/media/Files/downloads/gnu/$(TOOLCHAIN
 TOOLCHAINDIRNAME = $(TOOLCHAINNAME)-$(TOOLCHAINVER)-$(TOOLCHAINARCH)
 HOST = portal
 DOMAIN = local
-FQDN = ${HOST}.${DOMAIN}
+FQDN = $(HOST).$(DOMAIN)
 IP = 192.168.1.4
-PORTALURL = https://${FQDN}/
-RUNPYENV = source ${ROOT_DIR}venv/bin/activate 
+PORTALURL = https://$(FQDN)/
+RUNPYENV = source $(ROOT_DIR)venv/bin/activate 
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
+MAKE_USB_VID = 0x239A
+MAKE_USB_PID = 0x8120
+MAKE_USB_PRODUCT = "Pico W"
+MAKE_USB_MANUFACTURER = "Raspberry Pi"
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
 
@@ -117,10 +121,10 @@ makecert:
 	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
 
 distclean:
-	rm -rf ${ROOT_DIR}$(TOOLCHAINDIRNAME) ${ROOT_DIR}circuitpython ${ROOT_DIR}pico-ducky ${ROOT_DIR}cert.pem ${ROOT_DIR}key.pem ${ROOT_DIR}flash_nuke.uf2 ${ROOT_DIR}BOARD ${ROOT_DIR}Circuitpython_Keyboard_Layouts ${ROOT_DIR}keyboard_layout_win_sw.py  ${ROOT_DIR}keycode_win_sw.py ${ROOT_DIR}keyboard_layout_win_sw.mpy ${ROOT_DIR}keycode_win_sw.mpy ${ROOT_DIR}venv
+	rm -rf $(ROOT_DIR)$(TOOLCHAINDIRNAME) $(ROOT_DIR)circuitpython $(ROOT_DIR)pico-ducky $(ROOT_DIR)cert.pem $(ROOT_DIR)key.pem $(ROOT_DIR)flash_nuke.uf2 $(ROOT_DIR)BOARD $(ROOT_DIR)Circuitpython_Keyboard_Layouts $(ROOT_DIR)keyboard_layout_win_sw.py  $(ROOT_DIR)keycode_win_sw.py $(ROOT_DIR)keyboard_layout_win_sw.mpy $(ROOT_DIR)keycode_win_sw.mpy $(ROOT_DIR)venv
 
 patch:
-	patch ${ROOT_DIR}circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
+	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
 
 pythonvenv:
 	python3 -m venv venv
@@ -129,45 +133,48 @@ gitgetlatest:
 	cd circuitpython && ./tools/git-checkout-latest-tag.sh
 
 upgradepip:
-	${RUNPYENV} && cd circuitpython && pip3 install --upgrade pip
+	$(RUNPYENV) && cd circuitpython && pip3 install --upgrade pip
 
 installreq:
-	${RUNPYENV} && cd circuitpython && pip3 install --upgrade -r requirements-dev.txt
+	$(RUNPYENV) && cd circuitpython && pip3 install --upgrade -r requirements-dev.txt
 	
 installdoc:
-	${RUNPYENV} && cd circuitpython && pip3 install --upgrade -r requirements-doc.txt
+	$(RUNPYENV) && cd circuitpython && pip3 install --upgrade -r requirements-doc.txt
 
 installcircup:
-	${RUNPYENV} && cd circuitpython && pip3 install circup
+	$(RUNPYENV) && cd circuitpython && pip3 install circup
 
 fetchsubmod:
-	${EXPORT} && cd circuitpython && $(MAKE) ${MAKEOPT} fetch-all-submodules
+	$(EXPORT) && cd circuitpython && $(MAKE) $(MAKEOPT) fetch-all-submodules
 
 mpycross:
-	cd circuitpython && $(MAKE) ${MAKEOPT} -C mpy-cross
+	cd circuitpython && $(MAKE) $(MAKEOPT) -C mpy-cross
 
 fetchportsubmod:
-	${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) ${MAKEOPT} fetch-port-submodules
+	$(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) fetch-port-submodules
 	
 compile:
-	${RUNPYENV} && ${EXPORT} && cd circuitpython/ports/raspberrypi && $(MAKE) ${MAKEOPT} BOARD=$$(cat ${ROOT_DIR}BOARD) TRANSLATION=sv
+	$(RUNPYENV) && $(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) BOARD=$$(cat $(ROOT_DIR)BOARD) TRANSLATION=sv
 
 resetflash:
-	cp ${ROOT_DIR}flash_nuke.uf2 ${MOUNTPRPI} 
+	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI) 
 
 copyfirmware:
-	cp ${ROOT_DIR}circuitpython/ports/raspberrypi/build-${BOARD}/firmware.uf2 ${MOUNTPRPI}
+	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
 
 installpythondep:
-	${RUNPYENV} && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
+	$(RUNPYENV) && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
 
 makecircuitpyhtonkeybl:
-	${RUNPYENV} && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
-	${RUNPYENV} && PYTHONPATH="Circuitpython_Keyboard_Layouts" python3 -m generator -k "https://kbdlayout.info/kbdsw" -l "sw" --output-layout ${ROOT_DIR}keyboard_layout_win_sw.py --output-keycode ${ROOT_DIR}keycode_win_sw.py
+	$(RUNPYENV) && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
+	$(RUNPYENV) && PYTHONPATH="Circuitpython_Keyboard_Layouts" python3 -m generator -k "https://kbdlayout.info/kbdsw" -l "sw" --output-layout $(ROOT_DIR)keyboard_layout_win_sw.py --output-keycode $(ROOT_DIR)keycode_win_sw.py
 
 makekeympy:
-	${ROOT_DIR}circuitpython/mpy-cross/build/mpy-cross ${ROOT_DIR}keyboard_layout_win_sw.py
-	${ROOT_DIR}circuitpython/mpy-cross/build/mpy-cross ${ROOT_DIR}keycode_win_sw.py
+	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keyboard_layout_win_sw.py
+	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keycode_win_sw.py
 
 patch_no_dirty:
-	patch ${ROOT_DIR}circuitpython/py/version.py <<< $$no_dirty_patch
+	patch $(ROOT_DIR)circuitpython/py/version.py <<< $(no_dirty_patch)
+
+print-defines:
+	$(info $(patch_dhcpserver_file))
