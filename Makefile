@@ -4,10 +4,10 @@ define raspberry_pi_pico_patch
 -USB_PID = 0x80F4
 -USB_PRODUCT = "Pico"
 -USB_MANUFACTURER = "Raspberry Pi"
-+USB_VID = 0x03F0
-+USB_PID = 0x354A
-+USB_PRODUCT = "Slim Keyboard"
-+USB_MANUFACTURER = "HP, Inc"
++USB_VID = $(MAKE_USB_VID)
++USB_PID = $(MAKE_USB_PID)
++USB_PRODUCT = $(MAKE_USB_PRODUCT)
++USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 
  CHIP_VARIANT = RP2040
  CHIP_FAMILY = rp2
@@ -19,10 +19,10 @@ define raspberry_pi_pico_w_patch
 -USB_PID = 0x8120
 -USB_PRODUCT = "Pico W"
 -USB_MANUFACTURER = "Raspberry Pi"
-+USB_VID = 0x03F0
-+USB_PID = 0x354A
-+USB_PRODUCT = "Slim Keyboard"
-+USB_MANUFACTURER = "HP, Inc"
++USB_VID = $(MAKE_USB_VID)
++USB_PID = $(MAKE_USB_PID)
++USB_PRODUCT = $(MAKE_USB_PRODUCT)
++USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 
  CHIP_VARIANT = RP2040
  CHIP_FAMILY = rp2
@@ -34,10 +34,10 @@ define raspberry_pi_pico2_patch
 -USB_PID = 0x000B
 -USB_PRODUCT = "Pico 2"
 -USB_MANUFACTURER = "Raspberry Pi"
-+USB_VID = 0x03F0
-+USB_PID = 0x354A
-+USB_PRODUCT = "Slim Keyboard"
-+USB_MANUFACTURER = "HP, Inc"
++USB_VID = $(MAKE_USB_VID)
++USB_PID = $(MAKE_USB_PID)
++USB_PRODUCT = $(MAKE_USB_PRODUCT)
++USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 
  CHIP_VARIANT = RP2350
  CHIP_PACKAGE = A
@@ -49,10 +49,10 @@ define raspberry_pi_pico2_w_patch
 -USB_PID = 0x8162
 -USB_PRODUCT = "Pico 2 W"
 -USB_MANUFACTURER = "Raspberry Pi"
-+USB_VID = 0x03F0
-+USB_PID = 0x354A
-+USB_PRODUCT = "Slim Keyboard"
-+USB_MANUFACTURER = "HP, Inc"
++USB_VID = $(MAKE_USB_VID)
++USB_PID = $(MAKE_USB_PID)
++USB_PRODUCT = $(MAKE_USB_PRODUCT)
++USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 
  CHIP_VARIANT = RP2350
  CHIP_PACKAGE = A
@@ -119,12 +119,15 @@ IP = 192.168.1.4
 PORTALURL = https://$(FQDN)/
 RUNPYENV = source $(ROOT_DIR)venv/bin/activate 
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
-MAKE_USB_VID = 0x239A
-MAKE_USB_PID = 0x8120
-MAKE_USB_PRODUCT = "Pico W"
-MAKE_USB_MANUFACTURER = "Raspberry Pi"
+MAKE_USB_VID = 0x03F0
+MAKE_USB_PID = 0x354A
+MAKE_USB_PRODUCT = "Slim Keyboard"
+MAKE_USB_MANUFACTURER = "HP, Inc"
 MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
 MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
+
+
+
 
 export
 
@@ -243,4 +246,4 @@ patch_no_dirty:
 	patch $(ROOT_DIR)circuitpython/py/version.py <<< $${no_dirty_patch}
 
 print-defines:
-	$(info $(patch_raspberry_pi_pico_w))
+	$(info $(raspberry_pi_pico2_patch))
