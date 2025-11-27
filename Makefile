@@ -1,3 +1,63 @@
+define raspberry_pi_pico_patch
+@@ -1,7 +1,7 @@
+-USB_VID = 0x239A
+-USB_PID = 0x80F4
+-USB_PRODUCT = "Pico"
+-USB_MANUFACTURER = "Raspberry Pi"
++USB_VID = 0x03F0
++USB_PID = 0x354A
++USB_PRODUCT = "Slim Keyboard"
++USB_MANUFACTURER = "HP, Inc"
+
+ CHIP_VARIANT = RP2040
+ CHIP_FAMILY = rp2
+endef
+
+define raspberry_pi_pico_w_patch
+@@ -1,7 +1,7 @@
+-USB_VID = 0x239A
+-USB_PID = 0x8120
+-USB_PRODUCT = "Pico W"
+-USB_MANUFACTURER = "Raspberry Pi"
++USB_VID = 0x03F0
++USB_PID = 0x354A
++USB_PRODUCT = "Slim Keyboard"
++USB_MANUFACTURER = "HP, Inc"
+
+ CHIP_VARIANT = RP2040
+ CHIP_FAMILY = rp2
+endef
+
+define raspberry_pi_pico2_patch
+@@ -1,7 +1,7 @@
+-USB_VID = 0x2E8A
+-USB_PID = 0x000B
+-USB_PRODUCT = "Pico 2"
+-USB_MANUFACTURER = "Raspberry Pi"
++USB_VID = 0x03F0
++USB_PID = 0x354A
++USB_PRODUCT = "Slim Keyboard"
++USB_MANUFACTURER = "HP, Inc"
+
+ CHIP_VARIANT = RP2350
+ CHIP_PACKAGE = A
+endef
+
+define raspberry_pi_pico2_w_patch
+@@ -1,7 +1,7 @@
+-USB_VID = 0x239A
+-USB_PID = 0x8162
+-USB_PRODUCT = "Pico 2 W"
+-USB_MANUFACTURER = "Raspberry Pi"
++USB_VID = 0x03F0
++USB_PID = 0x354A
++USB_PRODUCT = "Slim Keyboard"
++USB_MANUFACTURER = "HP, Inc"
+
+ CHIP_VARIANT = RP2350
+ CHIP_PACKAGE = A
+endef
+
 define patch_dhcpserver_file
 @@ -57,6 +57,7 @@
  #define DHCP_OPT_DNS                (6)
@@ -124,7 +184,7 @@ distclean:
 	rm -rf $(ROOT_DIR)$(TOOLCHAINDIRNAME) $(ROOT_DIR)circuitpython $(ROOT_DIR)pico-ducky $(ROOT_DIR)cert.pem $(ROOT_DIR)key.pem $(ROOT_DIR)flash_nuke.uf2 $(ROOT_DIR)BOARD $(ROOT_DIR)Circuitpython_Keyboard_Layouts $(ROOT_DIR)keyboard_layout_win_sw.py  $(ROOT_DIR)keycode_win_sw.py $(ROOT_DIR)keyboard_layout_win_sw.mpy $(ROOT_DIR)keycode_win_sw.mpy $(ROOT_DIR)venv
 
 patch:
-	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $$patch_dhcpserver_file
+	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $${patch_dhcpserver_file}
 
 pythonvenv:
 	python3 -m venv venv
@@ -173,8 +233,14 @@ makekeympy:
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keyboard_layout_win_sw.py
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keycode_win_sw.py
 
+patch_raspberry_pi_pico:
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico/mpconfigboard.mk <<< $${raspberry_pi_pico_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico_w/mpconfigboard.mk <<< $${raspberry_pi_pico_w_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.mk <<< $${raspberry_pi_pico2_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.mk <<< $${raspberry_pi_pico2_w_patch}
+
 patch_no_dirty:
-	patch $(ROOT_DIR)circuitpython/py/version.py <<< $(no_dirty_patch)
+	patch $(ROOT_DIR)circuitpython/py/version.py <<< $${no_dirty_patch}
 
 print-defines:
-	$(info $(patch_dhcpserver_file))
+	$(info $(patch_raspberry_pi_pico_w))
