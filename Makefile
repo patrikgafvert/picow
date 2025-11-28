@@ -1,3 +1,12 @@
+define usb_own_pid_vid
+supervisor.set_usb_identification(
+manufacturer=“Project Pi”,
+product=“Pico Gamepad 3”,
+vid=0x239A,
+pid=0x00F2
+)
+endef
+
 define raspberry_pi_pico_patch
 @@ -1,7 +1,13 @@
 -USB_VID = 0x239A
