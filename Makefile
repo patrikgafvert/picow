@@ -210,20 +210,26 @@ pico-ducky:
 flash_nuke.uf2:
 	curl -LO https://datasheets.raspberrypi.com/soft/flash_nuke.uf2
 
-makecert:
-	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
+gitgetlatest:
+	cd circuitpython && ./tools/git-checkout-latest-tag.sh
 
-distclean:
-	rm -rf $(ROOT_DIR)$(TOOLCHAINDIRNAME) $(ROOT_DIR)circuitpython $(ROOT_DIR)pico-ducky $(ROOT_DIR)cert.pem $(ROOT_DIR)key.pem $(ROOT_DIR)flash_nuke.uf2 $(ROOT_DIR)BOARD $(ROOT_DIR)Circuitpython_Keyboard_Layouts $(ROOT_DIR)keyboard_layout_win_sw.py  $(ROOT_DIR)keycode_win_sw.py $(ROOT_DIR)keyboard_layout_win_sw.mpy $(ROOT_DIR)keycode_win_sw.mpy $(ROOT_DIR)venv
+patch_raspberry_pi_pico:
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico/mpconfigboard.mk <<< $${raspberry_pi_pico_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico_w/mpconfigboard.mk <<< $${raspberry_pi_pico_w_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.mk <<< $${raspberry_pi_pico2_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.mk <<< $${raspberry_pi_pico2_w_patch}
 
 patch:
 	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $${patch_dhcpserver_file}
 
+patch_no_dirty:
+	patch $(ROOT_DIR)circuitpython/py/version.py <<< $${no_dirty_patch}
+
+makecert:
+	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
+
 pythonvenv:
 	python3 -m venv venv
-
-gitgetlatest:
-	cd circuitpython && ./tools/git-checkout-latest-tag.sh
 
 upgradepip:
 	$(RUNPYENV) && cd circuitpython && pip3 install --upgrade pip
@@ -266,14 +272,8 @@ makekeympy:
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keyboard_layout_win_sw.py
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keycode_win_sw.py
 
-patch_raspberry_pi_pico:
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico/mpconfigboard.mk <<< $${raspberry_pi_pico_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico_w/mpconfigboard.mk <<< $${raspberry_pi_pico_w_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.mk <<< $${raspberry_pi_pico2_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.mk <<< $${raspberry_pi_pico2_w_patch}
-
-patch_no_dirty:
-	patch $(ROOT_DIR)circuitpython/py/version.py <<< $${no_dirty_patch}
-
 print-defines:
 	$(info $(raspberry_pi_pico2_patch))
+
+distclean:
+	rm -rf $(ROOT_DIR)$(TOOLCHAINDIRNAME) $(ROOT_DIR)circuitpython $(ROOT_DIR)pico-ducky $(ROOT_DIR)cert.pem $(ROOT_DIR)key.pem $(ROOT_DIR)flash_nuke.uf2 $(ROOT_DIR)BOARD $(ROOT_DIR)Circuitpython_Keyboard_Layouts $(ROOT_DIR)keyboard_layout_win_sw.py  $(ROOT_DIR)keycode_win_sw.py $(ROOT_DIR)keyboard_layout_win_sw.mpy $(ROOT_DIR)keycode_win_sw.mpy $(ROOT_DIR)venv
