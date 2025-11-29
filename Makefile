@@ -76,8 +76,21 @@ define patch_codepy
 endef
 
 
+define file_boot_py
+import board
+import digitalio
+import storage
+import usb_hid
 
+btn = digitalio.DigitalInOut(board.GP22)
+btn.switch_to_input(pull=digitalio.Pull.UP)
 
+if not btn.value:
+    storage.enable_usb_drive()
+else:
+    storage.disable_usb_drive()
+    usb_hid.enable((usb_hid.Device.KEYBOARD,usb_hid.Device.CONSUMER_CONTROL))
+endef
 
 define patch_keysw
 @@ -20,13 +20,13 @@
@@ -364,7 +377,7 @@ copyfirmware:
 	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
 
 installpythondep:
-	$(RUNPYENV) && circup install asyncio adafruit-circuitpython-httpserver adafruit_hid adafruit_debouncer adafruit_wsgi
+	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
 
 makecircuitpyhtonkeybl:
 	$(RUNPYENV) && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
@@ -376,6 +389,9 @@ makekeympy:
 
 makeduckympy:
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)pico-ducky/duckyinpython.py
+
+filebootpy:
+	printf '%s\n' "$$file_boot_py" > $(ROOT_DIR)boot.py
 
 patchkeyb:
 	patch $(ROOT_DIR)pico-ducky/duckyinpython.py <<< $${patch_keysw}
