@@ -1,3 +1,24 @@
+define patch_keysw
+@@ -20,13 +20,13 @@
+ from adafruit_hid.consumer_control_code import ConsumerControlCode
+
+ # comment out these lines for non_US keyboards
+-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
+-from adafruit_hid.keycode import Keycode
++#from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
++#from adafruit_hid.keycode import Keycode
+
+ # uncomment these lines for non_US keyboards
+ # replace LANG with appropriate language
+-#from keyboard_layout_win_LANG import KeyboardLayout as KeyboardLayout
+-#from keycode_win_LANG import Keycode
++from keyboard_layout_win_sw import KeyboardLayout as KeyboardLayout
++from keycode_win_sw import Keycode
+
+ def _capsOn():
+     return kbd.led_on(Keyboard.LED_CAPS_LOCK)
+endef
+
 define usb_own_pid_vid
 supervisor.set_usb_identification(
 manufacturer=“Project Pi”,
@@ -272,6 +293,9 @@ makekeympy:
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keyboard_layout_win_sw.py
 	$(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross $(ROOT_DIR)keycode_win_sw.py
 
+patchkeyb:
+	patch $(ROOT_DIR)pico-ducky/duckyinpython.py <<< $${patch_keysw}
+	
 print-defines:
 	$(info $(raspberry_pi_pico2_patch))
 
