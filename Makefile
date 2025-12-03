@@ -1,3 +1,55 @@
+define boot_py_file
+import board
+import digitalio
+
+btn = digitalio.DigitalInOut(board.GP22)
+btn.switch_to_input(pull=digitalio.Pull.UP)
+
+if not btn.value:
+    import storage
+    storage.enable_usb_drive()
+else:
+    import usb_hid
+    usb_hid.enable((usb_hid.Device.KEYBOARD,usb_hid.Device.CONSUMER_CONTROL))
+endef
+
+define code_py_file
+import asyncio
+import board
+import digitalio
+import usb_hid
+
+from adafruit_debouncer import Debouncer
+from adafruit_hid.keyboard import Keyboard
+from keyboard_layout_win_sw import KeyboardLayout
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayout(keyboard)
+
+with open("password.txt", "r") as fd:
+    password = fd.read().strip()
+
+pin = digitalio.DigitalInOut(board.GP22)
+pin.switch_to_input(pull=digitalio.Pull.UP)
+button = Debouncer(pin)
+
+(lambda l: (setattr(l, "direction", digitalio.Direction.OUTPUT), setattr(l, "value", True), l)[-1])(digitalio.DigitalInOut(board.LED))
+
+async def send_keystrokes():
+    layout.write(password)
+
+async def button_task():
+    while True:
+        button.update()
+        if button.fell:
+        	await send_keystrokes()
+        await asyncio.sleep(0.005)
+
+async def main():
+    await button_task()
+
+asyncio.run(main())
+endef
+
 define patch_filesystem
 @@ -176,7 +176,7 @@
          make_empty_file(&circuitpy->fatfs, "/settings.toml");
@@ -145,7 +197,6 @@ define no_dirty_patch
                      "--first-parent",
 endef
 
-
 .SILENT:
 SHELL := $(shell which bash)
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
@@ -281,8 +332,12 @@ makekeympy:
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
-filebootpy:
-	printf '%s\n' "$$file_boot_py" > $(ROOT_DIR)boot.py
+installkeylay:
+	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)/lib
+
+installfiles::
+	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)/boot.py
+	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)/code.py
 
 print-defines:
 	$(info $(raspberry_pi_pico2_patch))
