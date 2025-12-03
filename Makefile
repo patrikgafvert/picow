@@ -1,3 +1,15 @@
+define patch_filesystem
+@@ -176,7 +176,7 @@
+         make_empty_file(&circuitpy->fatfs, "/settings.toml");
+         #endif
+         // make a sample code.py file
+-        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/code.py", "print(\"Hello World!\")\n");
++        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/boot.py", "import storage\nstorage.enable_usb_drive()\n");
+
+         // create empty lib directory
+         res = f_mkdir(&circuitpy->fatfs, "/lib");
+endef
+
 define usb_own_pid_vid
 supervisor.set_usb_identification(
 manufacturer=“Project Pi”,
@@ -18,7 +30,7 @@ define raspberry_pi_pico_patch
 +USB_PRODUCT = $(MAKE_USB_PRODUCT)
 +USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 +
-+CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 1
++CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_DATA_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
@@ -39,7 +51,7 @@ define raspberry_pi_pico_w_patch
 +USB_PRODUCT = $(MAKE_USB_PRODUCT)
 +USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 +
-+CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 1
++CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_DATA_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
@@ -60,7 +72,7 @@ define raspberry_pi_pico2_patch
 +USB_PRODUCT = $(MAKE_USB_PRODUCT)
 +USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 +
-+CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 1
++CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_DATA_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
@@ -81,7 +93,7 @@ define raspberry_pi_pico2_w_patch
 +USB_PRODUCT = $(MAKE_USB_PRODUCT)
 +USB_MANUFACTURER = $(MAKE_USB_MANUFACTURER)
 +
-+CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 1
++CIRCUITPY_USB_MSC_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_DATA_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
@@ -222,8 +234,8 @@ patch:
 patch_no_dirty:
 	patch $(ROOT_DIR)circuitpython/py/version.py <<< $${no_dirty_patch}
 
-makecert:
-	openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=$(FQDN)" -addext "subjectAltName=DNS:$(FQDN)"
+patch_filesystem_file:
+	patch $(ROOT_DIR)circuitpython/supervisor/shared/filesystem.c <<< $${patch_filesystem}
 
 pythonvenv:
 	python3 -m venv venv
