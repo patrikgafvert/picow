@@ -224,12 +224,8 @@ MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
 
 export
 
-.PHONY: list all chooseboard download circuitpython circuitpythonkeybl pico-ducky makecert distclean patch pythonvenv gitgetlatest upgradepip installreq installdoc installcircup fetchsubmod mpycross fetchportsubmod compile resetflash copyfirmware installpythondep makecircuitpyhtonkeybl makekeympy $(TOOLCHAINDIRNAME)
-
-all: download makecert
-
-list:
-	grep -E '^[a-zA-Z0-9_-]+:.*$$' Makefile | cut -d':' -f1
+all:
+	echo "Empty"
 
 download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
 
@@ -338,9 +334,4 @@ installkeylay:
 installfiles::
 	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)/boot.py
 	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)/code.py
-
-print-defines:
-	$(info $(raspberry_pi_pico2_patch))
-
-distclean:
-	rm -rf $(ROOT_DIR)$(TOOLCHAINDIRNAME) $(ROOT_DIR)circuitpython $(ROOT_DIR)cert.pem $(ROOT_DIR)key.pem $(ROOT_DIR)flash_nuke.uf2 $(ROOT_DIR)BOARD $(ROOT_DIR)Circuitpython_Keyboard_Layouts $(ROOT_DIR)keyboard_layout_win_sw.py  $(ROOT_DIR)keycode_win_sw.py $(ROOT_DIR)keyboard_layout_win_sw.mpy $(ROOT_DIR)keycode_win_sw.mpy $(ROOT_DIR)venv
+	printf '%s' "Password123!" > $(MOUNTPCIR)/password.txt
