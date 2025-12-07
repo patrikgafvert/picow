@@ -219,8 +219,8 @@ MAKE_USB_VID = 0x03F0
 MAKE_USB_PID = 0x354A
 MAKE_USB_PRODUCT = "Slim Keyboard"
 MAKE_USB_MANUFACTURER = "HP, Inc"
-MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')
-MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')
+MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')/
+MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')/
 
 export
 
@@ -312,10 +312,10 @@ compile:
 	$(RUNPYENV) && $(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) BOARD=$$(cat $(ROOT_DIR)BOARD) TRANSLATION=sv
 
 resetflash:
-	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI) 
+	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)/
 
 copyfirmware:
-	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
+	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)/
 
 installpythondep:
 	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
@@ -329,9 +329,9 @@ makekeympy:
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
 installkeylay:
-	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)/lib
+	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)lib
 
 installfiles::
-	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)/boot.py
-	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)/code.py
-	printf '%s' "Password123!" > $(MOUNTPCIR)/password.txt
+	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)boot.py
+	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)code.py
+	printf '%s' "Password123!" > $(MOUNTPCIR)password.txt
