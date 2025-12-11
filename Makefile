@@ -254,16 +254,16 @@ chooseboard:
 	    fi; \
 	done
 
-$(TOOLCHAINDIRNAME):
+download_$(TOOLCHAINDIRNAME):
 	curl -L -# $(TOOLCHAINURL) | tar --xz -xf -
 
-circuitpython:
+download_circuitpython:
 	git clone https://github.com/adafruit/circuitpython
 
-circuitpythonkeybl:
+download_circuitpythonkeybl:
 	git clone https://github.com/Neradoc/Circuitpython_Keyboard_Layouts
 
-flash_nuke.uf2:
+download_flash_nuke.uf2:
 	curl -LO https://datasheets.raspberrypi.com/soft/flash_nuke.uf2
 
 gitgetlatest:
@@ -275,7 +275,7 @@ patch_raspberry_pi_pico:
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.mk <<< $${raspberry_pi_pico2_patch}
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.mk <<< $${raspberry_pi_pico2_w_patch}
 
-patch:
+patch_dhcpserver_file::
 	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $${patch_dhcpserver_file}
 
 patch_no_dirty:
