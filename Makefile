@@ -220,8 +220,8 @@ MAKE_USB_VID = 0x03F0
 MAKE_USB_PID = 0x354A
 MAKE_USB_PRODUCT = "Slim Keyboard"
 MAKE_USB_MANUFACTURER = "HP, Inc"
-MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY$$/p')/
-MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')/
+MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY/p')/
+MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2/p')/
 
 export
 
