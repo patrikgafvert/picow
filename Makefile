@@ -213,7 +213,8 @@ DOMAIN = local
 FQDN = $(HOST).$(DOMAIN)
 IP = 192.168.1.4
 PORTALURL = https://$(FQDN)/
-RUNPYENV = source $(ROOT_DIR)venv/bin/activate 
+VENVDIR = venv/
+RUNPYENV = source $(ROOT_DIR)$(VENVDIR)bin/activate 
 EXPORT = export PATH=$(shell pwd)/$(TOOLCHAINDIRNAME)/bin:$$PATH
 MAKE_USB_VID = 0x03F0
 MAKE_USB_PID = 0x354A
@@ -224,10 +225,7 @@ MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2$$/p')/
 
 export
 
-all:
-	echo "Empty"
-
-download: $(TOOLCHAINDIRNAME) circuitpython circuitpythonkeybl pico-ducky flash_nuke.uf2
+all:	download_$(TOOLCHAINDIRNAME) download_circuitpython chooseboard download_circuitpythonkeybl download_flash_nuke.uf2 gitgetlatest patch_raspberry_pi_pico patch_no_dirty patch_filesystem_file upgradepip installreq installdoc installcircup fetchportsubmod mpycross compile makecircuitpyhtonkeybl makekeympy resetflash copyfirmware installpythondep installfiles
 
 chooseboard:
 	while true; do \
@@ -285,7 +283,7 @@ patch_filesystem_file:
 	patch $(ROOT_DIR)circuitpython/supervisor/shared/filesystem.c <<< $${patch_filesystem}
 
 pythonvenv:
-	python3 -m venv venv
+	python3 -m venv $(VENVDIR)
 
 upgradepip:
 	$(RUNPYENV) && cd circuitpython && pip3 install --upgrade pip
@@ -302,23 +300,14 @@ installcircup:
 fetchsubmod:
 	$(EXPORT) && cd circuitpython && $(MAKE) $(MAKEOPT) fetch-all-submodules
 
-mpycross:
-	cd circuitpython && $(MAKE) $(MAKEOPT) -C mpy-cross
-
 fetchportsubmod:
 	$(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) fetch-port-submodules
 	
+mpycross:
+	cd circuitpython && $(MAKE) $(MAKEOPT) -C mpy-cross
+
 compile:
 	$(RUNPYENV) && $(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) BOARD=$$(cat $(ROOT_DIR)BOARD) TRANSLATION=sv
-
-resetflash:
-	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)/
-
-copyfirmware:
-	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)/
-
-installpythondep:
-	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
 
 makecircuitpyhtonkeybl:
 	$(RUNPYENV) && pip3 install -r Circuitpython_Keyboard_Layouts/requirements-dev.txt
@@ -328,10 +317,20 @@ makekeympy:
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
-installkeylay:
-	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)lib
+resetflash:
+	echo "Insert the pico with the reset key pressed to install and reset the firmware"
+	echo "Press ENTER to continue"
+	read
+	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)
 
-installfiles::
+copyfirmware:
+	while [ ! -d "$(MOUNTPRPI)" ]; do sleep 1; done;cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
+
+installpythondep:
+	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
+
+installfiles:
+	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)lib
 	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)boot.py
 	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)code.py
 	printf '%s' "Password123!" > $(MOUNTPCIR)password.txt
