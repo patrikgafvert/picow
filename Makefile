@@ -225,7 +225,7 @@ MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2/p')/
 
 export
 
-all:	download_$(TOOLCHAINDIRNAME) download_circuitpython chooseboard download_circuitpythonkeybl download_flash_nuke.uf2 gitgetlatest patch_raspberry_pi_pico patch_no_dirty patch_filesystem_file pythonvenv upgradepip installreq installdoc installcircup fetchportsubmod mpycross compile makecircuitpyhtonkeybl makekeympy resetflash copyfirmware installpythondep installfiles
+all:	download_$(TOOLCHAINDIRNAME) download_circuitpython chooseboard download_circuitpythonkeybl download_flash_nuke.uf2 gitgetlatest patch_raspberry_pi_pico patch_no_dirty patch_filesystem_file pythonvenv upgradepip installreq installdoc installcircup fetchportsubmod mpycross compile makecircuitpyhtonkeybl makekeympy deploy
 
 chooseboard:
 	while true; do \
@@ -317,14 +317,17 @@ makekeympy:
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
+deploy:
+	$(MAKE) resetflash copyfirmware installpythondep installfiles
+
 resetflash:
 	echo "Insert the pico with the reset key pressed to install and reset the firmware"
 	echo "Press ENTER to continue"
 	read
-	while [ ! -d "$(MOUNTPRPI)" ]; do sleep 1; done;cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)
+	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)
 
 copyfirmware:
-	while [ ! -d "$(MOUNTPRPI)" ]; do sleep 1; done;cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
+	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
 
 installpythondep:
 	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
