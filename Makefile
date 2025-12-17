@@ -322,11 +322,13 @@ resetflash:
 	echo "Press ENTER to continue"	
 	read
 	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
-	cp $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
+	cp -v $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
+	echo "Waiting 10sec to the device to come back"
+	sleep 10
 
 copyfirmware:
 	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
-	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $$($(MOUNTPRPI))
+	cp -v $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $$($(MOUNTPRPI))
 
 installpythondep:
 	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
@@ -334,7 +336,7 @@ installpythondep:
 
 installfiles:
 	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
-	cp keyboard_layout_win_sw.py keycode_win_sw.py $$($(MOUNTPCIR))/lib
+	cp -v keyboard_layout_win_sw.py keycode_win_sw.py $$($(MOUNTPCIR))/lib
 	printf '%s\n' "$$boot_py_file" > $$($(MOUNTPCIR))/boot.py
 	printf '%s\n' "$$code_py_file" > $$($(MOUNTPCIR))/code.py
 	printf '%s' "Password123!" > $$($(MOUNTPCIR))/password.txt
