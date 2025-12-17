@@ -323,8 +323,8 @@ resetflash:
 	read
 	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
 	cp -v $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
-	echo "Waiting 10sec to the device to come back"
-	sleep 10
+	echo "Waiting 15sec to the device to come back"
+	sleep 15
 
 copyfirmware:
 	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
