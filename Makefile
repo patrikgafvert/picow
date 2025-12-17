@@ -340,3 +340,6 @@ installfiles:
 	printf '%s\n' "$$boot_py_file" > $$($(MOUNTPCIR))/boot.py
 	printf '%s\n' "$$code_py_file" > $$($(MOUNTPCIR))/code.py
 	printf '%s' "Password123!" > $$($(MOUNTPCIR))/password.txt
+
+distclean:
+	git clean -ffdx
