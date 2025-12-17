@@ -321,16 +321,19 @@ resetflash:
 	echo "Insert the pico with the reset key pressed to install and reset the firmware"
 	echo "Press ENTER to continue"	
 	read
-	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done; cp $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
+	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
+	cp $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
 
 copyfirmware:
-	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done; cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $$($(MOUNTPRPI))
+	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done
+	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $$($(MOUNTPRPI))
 
 installpythondep:
 	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
 	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
 
 installfiles:
+	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
 	cp keyboard_layout_win_sw.py keycode_win_sw.py $$($(MOUNTPCIR))/lib
 	printf '%s\n' "$$boot_py_file" > $$($(MOUNTPCIR))/boot.py
 	printf '%s\n' "$$code_py_file" > $$($(MOUNTPCIR))/code.py
