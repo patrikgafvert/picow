@@ -220,12 +220,12 @@ MAKE_USB_VID = 0x03F0
 MAKE_USB_PID = 0x354A
 MAKE_USB_PRODUCT = "Slim Keyboard"
 MAKE_USB_MANUFACTURER = "HP, Inc"
-MOUNTPCIR = $(shell mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY/p')/
-MOUNTPRPI = $(shell mount | cut -f3 -d ' ' | sed -n '/RPI-RP2/p')/
+MOUNTPCIR = mount | cut -f3 -d ' ' | sed -n '/CIRCUITPY/p'
+MOUNTPRPI = mount | cut -f3 -d ' ' | sed -n '/RPI-RP2/p'
 
 export
 
-all:	download_$(TOOLCHAINDIRNAME) download_circuitpython chooseboard download_circuitpythonkeybl download_flash_nuke.uf2 gitgetlatest patch_raspberry_pi_pico patch_no_dirty patch_filesystem_file pythonvenv upgradepip installreq installdoc installcircup fetchportsubmod mpycross compile makecircuitpyhtonkeybl makekeympy deploy
+all:	download_$(TOOLCHAINDIRNAME) download_circuitpython chooseboard download_circuitpythonkeybl download_flash_nuke.uf2 gitgetlatest patch_raspberry_pi_pico patch_no_dirty patch_filesystem_file pythonvenv upgradepip installreq installdoc installcircup fetchportsubmod mpycross compile makecircuitpyhtonkeybl makekeympy resetflash copyfirmware installpythondep installfiles
 
 chooseboard:
 	while true; do \
@@ -273,7 +273,7 @@ patch_raspberry_pi_pico:
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.mk <<< $${raspberry_pi_pico2_patch}
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.mk <<< $${raspberry_pi_pico2_w_patch}
 
-patch_dhcpserver_file::
+patch_dhcpserver_file:
 	patch $(ROOT_DIR)circuitpython/shared/netutils/dhcpserver.c <<< $${patch_dhcpserver_file}
 
 patch_no_dirty:
@@ -317,23 +317,21 @@ makekeympy:
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
-deploy:
-	$(MAKE) resetflash copyfirmware installpythondep installfiles
-
 resetflash:
 	echo "Insert the pico with the reset key pressed to install and reset the firmware"
-	echo "Press ENTER to continue"
+	echo "Press ENTER to continue"	
 	read
-	cp $(ROOT_DIR)flash_nuke.uf2 $(MOUNTPRPI)
+	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done; cp $(ROOT_DIR)flash_nuke.uf2 $$($(MOUNTPRPI))
 
 copyfirmware:
-	cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $(MOUNTPRPI)
+	while [ -z "$$($(MOUNTPRPI))" ] || [ ! -d "$$($(MOUNTPRPI))" ]; do sleep 1; done; cp $(ROOT_DIR)circuitpython/ports/raspberrypi/build-$$(cat $(ROOT_DIR)BOARD)/firmware.uf2 $$($(MOUNTPRPI))
 
 installpythondep:
+	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
 	$(RUNPYENV) && circup install asyncio adafruit_hid adafruit_debouncer
 
 installfiles:
-	cp keyboard_layout_win_sw.py keycode_win_sw.py $(MOUNTPCIR)lib
-	printf '%s\n' "$$boot_py_file" > $(MOUNTPCIR)boot.py
-	printf '%s\n' "$$code_py_file" > $(MOUNTPCIR)code.py
-	printf '%s' "Password123!" > $(MOUNTPCIR)password.txt
+	cp keyboard_layout_win_sw.py keycode_win_sw.py $$($(MOUNTPCIR))/lib
+	printf '%s\n' "$$boot_py_file" > $$($(MOUNTPCIR))/boot.py
+	printf '%s\n' "$$code_py_file" > $$($(MOUNTPCIR))/code.py
+	printf '%s' "Password123!" > $$($(MOUNTPCIR))/password.txt
