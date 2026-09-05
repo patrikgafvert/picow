@@ -231,8 +231,7 @@ define no_dirty_patch
 endef
 
 define no_usb_serial_patch
-@@ -78,7 +78,7 @@
-     0xFF,        // 14 iManufacturer (String Index) [SET AT RUNTIME]
+@@ -78,7 +78,7 @@ static const uint8_t device_descriptor_template[] = {
  #define DEVICE_MANUFACTURER_STRING_INDEX (14)
      0xFF,        // 15 iProduct (String Index) [SET AT RUNTIME]
  #define DEVICE_PRODUCT_STRING_INDEX (15)
@@ -240,16 +239,18 @@ define no_usb_serial_patch
 +    0x00,        // 16 iSerialNumber (String Index) - disabled
  #define DEVICE_SERIAL_NUMBER_STRING_INDEX (16)
      0x01,        // 17 bNumConfigurations 1
-@@ -118,9 +118,5 @@
-     usb_add_interface_string(current_interface_string, identification->product_name);
+ };
+@@ -119,10 +119,6 @@ static bool usb_build_device_descriptor(const usb_identification_t *identificati
      device_descriptor[DEVICE_PRODUCT_STRING_INDEX] = current_interface_string;
      current_interface_string++;
--
+ 
 -    usb_add_interface_string(current_interface_string, serial_number_hex_string);
 -    device_descriptor[DEVICE_SERIAL_NUMBER_STRING_INDEX] = current_interface_string;
 -    current_interface_string++;
- 
+-
      return true;
+ }
+ 
 endef
 
 # Fix a GCC false positive in the vendored mbedtls GCM code
