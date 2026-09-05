@@ -253,7 +253,6 @@ define no_usb_serial_patch
  
 endef
 
-# Fix a GCC false positive in the vendored mbedtls GCM code
 define mbedtls_array_bounds_patch
 @@ -728,7 +728,8 @@
  # are compiled out.
@@ -295,7 +294,6 @@ BOARD_FILE := $(ROOT_DIR)BOARD
 BOARD_NAME := $(shell cat $(BOARD_FILE) 2>/dev/null)
 STAMP_DIR = .stamps
 
-# Välj mount-avkänning utifrån vald board; Pico 2 (RP2350) monteras som "RP2350"
 ifneq ($(findstring 2,$(BOARD_NAME)),)
 MOUNTPICO := $(MOUNTPICO2)
 else
@@ -308,10 +306,6 @@ export boot_py_file code_py_file \
        waveshare_rp2040_one_patch waveshare_rp2350_one_patch \
        pico_h_patch waveshare_h_patch no_dirty_patch no_usb_serial_patch \
        mbedtls_array_bounds_patch
-
-# ===================================================================
-# Huvudmål
-# ===================================================================
 
 .PHONY: all chooseboard flash resetflash copyfirmware installpythondep \
         installfiles distclean clean fetchsubmod visa_block
