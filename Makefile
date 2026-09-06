@@ -205,14 +205,47 @@ define waveshare_rp2350_one_patch
 endef
 
 define pico_h_patch
-@@ -14,2 +14,3 @@
+@@ -13,3 +13,4 @@
+ 
  #define CIRCUITPY_BOARD_I2C         (1)
  #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
-define waveshare_h_patch
+define pico2_h_patch
+@@ -11,3 +11,4 @@
+ 
+ #define CIRCUITPY_BOARD_I2C         (1)
+ #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
++#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
+endef
+
+define pico2_w_h_patch
+@@ -14,3 +14,4 @@
+ 
+ #define CIRCUITPY_BOARD_I2C         (1)
+ #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
++#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
+endef
+
+define pico_w_h_patch
+@@ -16,3 +16,4 @@
+ 
+ #define CIRCUITPY_BOARD_I2C         (1)
+ #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
++#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
+endef
+
+define waveshare_rp2040_one_h_patch
 @@ -20,3 +20,4 @@
+ #define DEFAULT_SPI_BUS_MISO (&pin_GPIO8)
+ 
+ #define MICROPY_HW_NEOPIXEL (&pin_GPIO16)
++#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
+endef
+
+define waveshare_rp2350_one_h_patch
+@@ -21,3 +21,4 @@
  #define DEFAULT_SPI_BUS_MISO (&pin_GPIO8)
  
  #define MICROPY_HW_NEOPIXEL (&pin_GPIO16)
@@ -250,7 +283,7 @@ define no_usb_serial_patch
 -
      return true;
  }
- 
+
 endef
 
 # Fix a GCC false positive in the vendored mbedtls GCM code
@@ -306,8 +339,9 @@ export boot_py_file code_py_file \
        patch_filesystem raspberry_pi_pico_patch raspberry_pi_pico_w_patch \
        raspberry_pi_pico2_patch raspberry_pi_pico2_w_patch \
        waveshare_rp2040_one_patch waveshare_rp2350_one_patch \
-       pico_h_patch waveshare_h_patch no_dirty_patch no_usb_serial_patch \
-       mbedtls_array_bounds_patch
+       pico_h_patch pico2_h_patch pico2_w_h_patch pico_w_h_patch \
+       waveshare_rp2040_one_h_patch waveshare_rp2350_one_h_patch \
+       no_dirty_patch no_usb_serial_patch mbedtls_array_bounds_patch
 
 # ===================================================================
 # Huvudmål
@@ -374,11 +408,11 @@ $(STAMP_DIR)/patch-pico: $(STAMP_DIR)/circuitpython-latest
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2040_one/mpconfigboard.mk <<< $${waveshare_rp2040_one_patch}
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2350_one/mpconfigboard.mk <<< $${waveshare_rp2350_one_patch}
 	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico/mpconfigboard.h <<< $${pico_h_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico_w/mpconfigboard.h <<< $${pico_h_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.h <<< $${pico_h_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.h <<< $${pico_h_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2040_one/mpconfigboard.h <<< $${waveshare_h_patch}
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2350_one/mpconfigboard.h <<< $${waveshare_h_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico_w/mpconfigboard.h <<< $${pico_w_h_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2/mpconfigboard.h <<< $${pico2_h_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/raspberry_pi_pico2_w/mpconfigboard.h <<< $${pico2_w_h_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2040_one/mpconfigboard.h <<< $${waveshare_rp2040_one_h_patch}
+	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/boards/waveshare_rp2350_one/mpconfigboard.h <<< $${waveshare_rp2350_one_h_patch}
 	@touch $@
 
 $(STAMP_DIR)/patch-no-dirty: $(STAMP_DIR)/circuitpython-latest
@@ -491,3 +525,4 @@ visa_block:
 
 %:
 	@:
+
