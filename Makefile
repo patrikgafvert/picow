@@ -396,7 +396,6 @@ $(STAMP_DIR)/circup: $(STAMP_DIR)/pip
 	@touch $@
 
 $(STAMP_DIR)/submodules: $(STAMP_DIR)/circuitpython-latest
-	$(EXPORT) && cd circuitpython && $(MAKE) $(MAKEOPT) fetch-all-submodules
 	$(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) fetch-port-submodules
 	@touch $@
 
@@ -509,7 +508,7 @@ flash: $(STAMP_DIR)/compile keyboard_layout_win_sw.mpy keycode_win_sw.mpy $(STAM
 	$(MAKE) installfiles
 
 fetchsubmod:
-	$(EXPORT) && cd circuitpython && $(MAKE) $(MAKEOPT) fetch-all-submodules
+	$(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) fetch-port-submodules
 
 clean:
 	@test -f $(BOARD_FILE) || { echo "Ingen board vald. Kör först: make chooseboard"; exit 1; }
