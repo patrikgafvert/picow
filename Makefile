@@ -506,6 +506,7 @@ flash: $(STAMP_DIR)/compile keyboard_layout_win_sw.mpy keycode_win_sw.mpy $(STAM
 	$(MAKE) copyfirmware
 	$(MAKE) installpythondep
 	$(MAKE) installfiles
+	umount $$($(MOUNTPCIR))
 
 fetchsubmod:
 	$(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) fetch-port-submodules
