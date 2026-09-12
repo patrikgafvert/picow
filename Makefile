@@ -328,8 +328,8 @@ BOARD_FILE := $(ROOT_DIR)BOARD
 BOARD_NAME := $(shell cat $(BOARD_FILE) 2>/dev/null)
 STAMP_DIR = .stamps
 
-# Välj mount-avkänning utifrån vald board; Pico 2 (RP2350) monteras som "RP2350"
-ifneq ($(findstring 2,$(BOARD_NAME)),)
+# Välj mount-avkänning utifrån vald board; RP2350 (Pico 2 / RP2350-One) monteras som "RP2350"
+ifneq ($(or $(findstring pico2,$(BOARD_NAME)),$(findstring rp2350,$(BOARD_NAME))),)
 MOUNTPICO := $(MOUNTPICO2)
 else
 MOUNTPICO := $(MOUNTPICO1)
