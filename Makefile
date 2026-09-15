@@ -2,7 +2,7 @@ define boot_py_file
 import board
 import digitalio
 
-btn = digitalio.DigitalInOut(board.GP22)
+btn = digitalio.DigitalInOut(board.GP1)
 btn.switch_to_input(pull=digitalio.Pull.UP)
 
 if not btn.value:
@@ -14,15 +14,21 @@ else:
 endef
 
 define code_py_file
+import asyncio
 import board
 import digitalio
 import usb_hid
-import time
 
 from adafruit_debouncer import Debouncer
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from keyboard_layout_win_sw import KeyboardLayout
+
+try:
+    from neopixel import NeoPixel
+    pixel = NeoPixel(board.NEOPIXEL, 1, brightness=0.1, auto_write=False)
+except (ImportError, AttributeError):
+    pixel = None
 
 keyboard = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(keyboard)
@@ -34,35 +40,56 @@ def load_text(filename):
     except OSError:
         return ""
 
-button_text   = load_text("button.txt")
-caps_text     = load_text("caps_lock.txt")
-num_text      = load_text("num_lock.txt")
-scroll_text   = load_text("scroll_lock.txt")
+button_text = load_text("button.txt")
+caps_text   = load_text("caps_lock.txt")
+num_text    = load_text("num_lock.txt")
+scroll_text = load_text("scroll_lock.txt")
 
-pin = digitalio.DigitalInOut(board.GP22)
+pin = digitalio.DigitalInOut(board.GP1)
 pin.switch_to_input(pull=digitalio.Pull.UP)
 button = Debouncer(pin)
 
-def check_button():
+def wheel(pos):
+    if pos < 85:
+        return (pos * 3, 255 - pos * 3, 0)
+    if pos < 170:
+        pos -= 85
+        return (255 - pos * 3, 0, pos * 3)
+    pos -= 170
+    return (0, pos * 3, 255 - pos * 3)
+
+async def check_button():
     button.update()
     if button.fell and button_text:
         layout.write(button_text)
 
-def handle_lock(led, keycode, text):
+async def handle_lock(led, keycode, text):
     if keyboard.led_on(led) and text:
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
         keyboard.send(keycode)
         layout.write(text)
 
-def main():
+async def keyboard_task():
     while True:
-        check_button()
-        handle_lock(Keyboard.LED_CAPS_LOCK,   Keycode.CAPS_LOCK,      caps_text)
-        handle_lock(Keyboard.LED_NUM_LOCK,    Keycode.KEYPAD_NUMLOCK, num_text)
-        handle_lock(Keyboard.LED_SCROLL_LOCK, Keycode.SCROLL_LOCK,    scroll_text)
-        time.sleep(0.01)
+        await check_button()
+        await handle_lock(Keyboard.LED_CAPS_LOCK,   Keycode.CAPS_LOCK,      caps_text)
+        await handle_lock(Keyboard.LED_NUM_LOCK,    Keycode.KEYPAD_NUMLOCK, num_text)
+        await handle_lock(Keyboard.LED_SCROLL_LOCK, Keycode.SCROLL_LOCK,    scroll_text)
+        await asyncio.sleep(0.01)
 
-main()
+async def led_task():
+    if pixel is None:
+        return
+    while True:
+        for i in range(256):
+            pixel[0] = wheel(i)
+            pixel.show()
+            await asyncio.sleep(0.02)
+
+async def main():
+    await asyncio.gather(keyboard_task(), led_task())
+
+asyncio.run(main())
 endef
 
 define patch_filesystem
@@ -489,7 +516,7 @@ copyfirmware: $(STAMP_DIR)/compile
 
 installpythondep: $(STAMP_DIR)/circup
 	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
-	$(RUNPYENV) && circup --path $$($(MOUNTPCIR)) install asyncio adafruit_hid adafruit_debouncer
+	$(RUNPYENV) && circup --path $$($(MOUNTPCIR)) install asyncio adafruit_hid adafruit_debouncer neopixel
 
 installfiles: keyboard_layout_win_sw.mpy keycode_win_sw.mpy
 	while [ -z "$$($(MOUNTPCIR))" ] || [ ! -d "$$($(MOUNTPCIR))" ]; do sleep 1; done
