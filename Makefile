@@ -93,12 +93,12 @@ asyncio.run(main())
 endef
 
 define patch_filesystem
-@@ -176,7 +176,7 @@
-         make_empty_file(&circuitpy->fatfs, "/settings.toml");
+@@ -421,7 +421,7 @@ bool filesystem_init(bool create_allowed, bool force_create) {
+         make_empty_file(&_circuitpy_mount, "/settings.toml");
          #endif
          // make a sample code.py file
--        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/code.py", "print(\"Hello World!\")\n");
-+        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/boot.py", "import storage\nstorage.enable_usb_drive()\n");
+-        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&_circuitpy_mount, "/code.py", "print(\"Hello World!\")\n");
++        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&_circuitpy_mount, "/boot.py", "import storage\nstorage.enable_usb_drive()\n");
 
          // create empty lib directory
          res = f_mkdir(&circuitpy->fatfs, "/lib");
