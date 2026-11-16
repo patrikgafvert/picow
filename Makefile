@@ -93,19 +93,20 @@ asyncio.run(main())
 endef
 
 define patch_filesystem
-@@ -176,7 +176,7 @@
-         make_empty_file(&circuitpy->fatfs, "/settings.toml");
-         #endif
-         // make a sample code.py file
--        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/code.py", "print(\"Hello World!\")\n");
-+        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&circuitpy->fatfs, "/boot.py", "import storage\nstorage.enable_usb_drive()\n");
-
-         // create empty lib directory
-         res = f_mkdir(&circuitpy->fatfs, "/lib");
+@@ -322,2 +322,2 @@
+-        // make a sample code.py file
+-        lfs_write_boot_file("/code.py", "print(\"Hello World!\")\n", sizeof("print(\"Hello World!\")\n") - 1);
++        // make a sample boot.py file
++        lfs_write_boot_file("/boot.py", "import storage\nstorage.enable_usb_drive()\n", sizeof("import storage\nstorage.enable_usb_drive()\n") - 1);
+@@ -423,2 +423,2 @@
+-        // make a sample code.py file
+-        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&_circuitpy_mount, "/code.py", "print(\"Hello World!\")\n");
++        // make a sample boot.py file
++        MAKE_FILE_WITH_OPTIONAL_CONTENTS(&_circuitpy_mount, "/boot.py", "import storage\nstorage.enable_usb_drive()\n");
 endef
 
 define raspberry_pi_pico_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x239A
 -USB_PID = 0x80F4
 -USB_PRODUCT = "Pico"
@@ -120,13 +121,10 @@ define raspberry_pi_pico_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2040
- CHIP_FAMILY = rp2
 endef
 
 define raspberry_pi_pico_w_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x239A
 -USB_PID = 0x8120
 -USB_PRODUCT = "Pico W"
@@ -141,13 +139,10 @@ define raspberry_pi_pico_w_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2040
- CHIP_FAMILY = rp2
 endef
 
 define raspberry_pi_pico2_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x2E8A
 -USB_PID = 0x000B
 -USB_PRODUCT = "Pico 2"
@@ -162,13 +157,10 @@ define raspberry_pi_pico2_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2350
- CHIP_PACKAGE = A
 endef
 
 define raspberry_pi_pico2_w_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x239A
 -USB_PID = 0x8162
 -USB_PRODUCT = "Pico 2 W"
@@ -183,13 +175,10 @@ define raspberry_pi_pico2_w_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2350
- CHIP_PACKAGE = A
 endef
 
 define waveshare_rp2040_one_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x2E8A
 -USB_PID = 0x103A
 -USB_PRODUCT = "RP2040-One"
@@ -204,13 +193,10 @@ define waveshare_rp2040_one_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2040
- CHIP_FAMILY = rp2
 endef
 
 define waveshare_rp2350_one_patch
-@@ -1,7 +1,13 @@
+@@ -1,4 +1,10 @@
 -USB_VID = 0x2E8A
 -USB_PID = 0x10B5
 -USB_PRODUCT = "RP2350-One"
@@ -225,106 +211,52 @@ define waveshare_rp2350_one_patch
 +CIRCUITPY_USB_CDC_CONSOLE_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_HID_ENABLED_DEFAULT = 0
 +CIRCUITPY_USB_MIDI_ENABLED_DEFAULT = 0
-
- CHIP_VARIANT = RP2350
- CHIP_PACKAGE = A
- CHIP_FAMILY = rp2
 endef
 
 define pico_h_patch
-@@ -13,3 +13,4 @@
- 
- #define CIRCUITPY_BOARD_I2C         (1)
- #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
+@@ -15,0 +16 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define pico2_h_patch
-@@ -11,3 +11,4 @@
- 
- #define CIRCUITPY_BOARD_I2C         (1)
- #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
+@@ -13,0 +14 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define pico2_w_h_patch
-@@ -14,3 +14,4 @@
- 
- #define CIRCUITPY_BOARD_I2C         (1)
- #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
+@@ -16,0 +17 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define pico_w_h_patch
-@@ -16,3 +16,4 @@
- 
- #define CIRCUITPY_BOARD_I2C         (1)
- #define CIRCUITPY_BOARD_I2C_PIN     {{.scl = &pin_GPIO5, .sda = &pin_GPIO4}}
+@@ -18,0 +19 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define waveshare_rp2040_one_h_patch
-@@ -20,3 +20,4 @@
- #define DEFAULT_SPI_BUS_MISO (&pin_GPIO8)
- 
- #define MICROPY_HW_NEOPIXEL (&pin_GPIO16)
+@@ -22,0 +23 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define waveshare_rp2350_one_h_patch
-@@ -21,3 +21,4 @@
- #define DEFAULT_SPI_BUS_MISO (&pin_GPIO8)
- 
- #define MICROPY_HW_NEOPIXEL (&pin_GPIO16)
+@@ -23,0 +24 @@
 +#define CIRCUITPY_DRIVE_LABEL "$(DRIVE_LABEL)"
 endef
 
 define no_dirty_patch
-@@ -14,7 +14,6 @@
-                 [
-                     "git",
-                     "describe",
+@@ -17 +16,0 @@
 -                    "--dirty",
-                     "--tags",
-                     "--always",
-                     "--first-parent",
 endef
 
 define no_usb_serial_patch
-@@ -78,7 +78,7 @@ static const uint8_t device_descriptor_template[] = {
- #define DEVICE_MANUFACTURER_STRING_INDEX (14)
-     0xFF,        // 15 iProduct (String Index) [SET AT RUNTIME]
- #define DEVICE_PRODUCT_STRING_INDEX (15)
+@@ -83 +83 @@
 -    0xFF,        // 16 iSerialNumber (String Index)  [SET AT RUNTIME]
 +    0x00,        // 16 iSerialNumber (String Index) - disabled
- #define DEVICE_SERIAL_NUMBER_STRING_INDEX (16)
-     0x01,        // 17 bNumConfigurations 1
- };
-@@ -119,10 +119,6 @@ static bool usb_build_device_descriptor(const usb_identification_t *identificati
-     device_descriptor[DEVICE_PRODUCT_STRING_INDEX] = current_interface_string;
-     current_interface_string++;
- 
+@@ -124,4 +124,0 @@
 -    usb_add_interface_string(current_interface_string, serial_number_hex_string);
 -    device_descriptor[DEVICE_SERIAL_NUMBER_STRING_INDEX] = current_interface_string;
 -    current_interface_string++;
 -
-     return true;
- }
-
-endef
-
-# Fix a GCC false positive in the vendored mbedtls GCM code
-define mbedtls_array_bounds_patch
-@@ -728,7 +728,8 @@
- # are compiled out.
- $$(patsubst %.c,$$(BUILD)/%.o,$$(SRC_MBEDTLS)) $$(OBJ_MBEDTLS): CFLAGS += \$(EMPTY)
- 	-Wno-suggest-attribute=format \$(EMPTY)
--	-Wno-unused-but-set-variable
-+	-Wno-unused-but-set-variable \$(EMPTY)
-+	-Wno-array-bounds
- else
- OBJ_MBEDTLS :=
- endif
 endef
 
 #.SILENT:
@@ -368,7 +300,7 @@ export boot_py_file code_py_file \
        waveshare_rp2040_one_patch waveshare_rp2350_one_patch \
        pico_h_patch pico2_h_patch pico2_w_h_patch pico_w_h_patch \
        waveshare_rp2040_one_h_patch waveshare_rp2350_one_h_patch \
-       no_dirty_patch no_usb_serial_patch mbedtls_array_bounds_patch
+       no_dirty_patch no_usb_serial_patch
 
 # ===================================================================
 # Huvudmål
@@ -453,10 +385,6 @@ $(STAMP_DIR)/patch-filesystem: $(STAMP_DIR)/circuitpython-latest
 	patch $(ROOT_DIR)circuitpython/supervisor/shared/filesystem.c <<< $${patch_filesystem}
 	@touch $@
 
-$(STAMP_DIR)/patch-mbedtls: $(STAMP_DIR)/circuitpython-latest
-	patch $(ROOT_DIR)circuitpython/ports/raspberrypi/Makefile <<< $${mbedtls_array_bounds_patch}
-	@touch $@
-
 $(STAMP_DIR)/mpy-cross: $(STAMP_DIR)/toolchain $(STAMP_DIR)/circuitpython-latest
 	cd circuitpython && $(MAKE) $(MAKEOPT) -C mpy-cross
 	@touch $@
@@ -472,7 +400,7 @@ keyboard_layout_win_sw.mpy keycode_win_sw.mpy &: keyboard_layout_win_sw.py keyco
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keyboard_layout_win_sw.py
 	cd $(ROOT_DIR) && $(ROOT_DIR)circuitpython/mpy-cross/build/mpy-cross keycode_win_sw.py
 
-$(STAMP_DIR)/compile: $(STAMP_DIR)/patch-pico $(STAMP_DIR)/patch-filesystem $(STAMP_DIR)/patch-mbedtls $(STAMP_DIR)/patch-no-usb-serial $(STAMP_DIR)/patch-no-dirty $(STAMP_DIR)/submodules $(STAMP_DIR)/mpy-cross $(STAMP_DIR)/requirements-dev $(STAMP_DIR)/requirements-doc
+$(STAMP_DIR)/compile: $(STAMP_DIR)/patch-pico $(STAMP_DIR)/patch-filesystem $(STAMP_DIR)/patch-no-usb-serial $(STAMP_DIR)/patch-no-dirty $(STAMP_DIR)/submodules $(STAMP_DIR)/mpy-cross $(STAMP_DIR)/requirements-dev $(STAMP_DIR)/requirements-doc
 	@test -f $(BOARD_FILE) || $(MAKE) chooseboard
 	$(RUNPYENV) && $(EXPORT) && cd circuitpython/ports/raspberrypi && $(MAKE) $(MAKEOPT) BOARD=$$(cat $(ROOT_DIR)BOARD) TRANSLATION=sv
 	@touch $@
