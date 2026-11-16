@@ -294,20 +294,22 @@ else
 MOUNTPICO := $(MOUNTPICO1)
 endif
 
-export boot_py_file code_py_file \
-       patch_filesystem raspberry_pi_pico_patch raspberry_pi_pico_w_patch \
-       raspberry_pi_pico2_patch raspberry_pi_pico2_w_patch \
-       waveshare_rp2040_one_patch waveshare_rp2350_one_patch \
-       pico_h_patch pico2_h_patch pico2_w_h_patch pico_w_h_patch \
-       waveshare_rp2040_one_h_patch waveshare_rp2350_one_h_patch \
-       no_dirty_patch no_usb_serial_patch
+# Alla patchvariabler, används av export och av visa_alla_patchar
+PATCH_VARS = patch_filesystem raspberry_pi_pico_patch \
+             raspberry_pi_pico_w_patch raspberry_pi_pico2_patch \
+             raspberry_pi_pico2_w_patch waveshare_rp2040_one_patch \
+             waveshare_rp2350_one_patch pico_h_patch pico2_h_patch \
+             pico2_w_h_patch pico_w_h_patch waveshare_rp2040_one_h_patch \
+             waveshare_rp2350_one_h_patch no_dirty_patch no_usb_serial_patch
+
+export boot_py_file code_py_file $(PATCH_VARS)
 
 # ===================================================================
 # Huvudmål
 # ===================================================================
 
 .PHONY: all chooseboard flash resetflash copyfirmware installpythondep \
-        installfiles distclean clean fetchsubmod visa_block
+        installfiles distclean clean fetchsubmod visa_block visa_alla_patchar
 
 all: flash
 
@@ -475,8 +477,17 @@ clean:
 distclean:
 	git clean -ffdx
 
+# Visar en patch med namn och innehåll, används av visa_block/visa_alla_patchar
+define visa_patch
+$(info ===== $(1) =====)
+$(info $(value $(1)))
+endef
+
 visa_block:
-	@$(info $(value $(word 2,$(MAKECMDGOALS))))
+	@$(call visa_patch,$(word 2,$(MAKECMDGOALS)))
+
+visa_alla_patchar:
+	@$(foreach p,$(PATCH_VARS),$(call visa_patch,$p))
 
 %:
 	@:
